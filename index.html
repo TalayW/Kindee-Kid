@@ -4,12 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#2f8f5b">
-  <meta name="description" content="กินดี Kids เว็บแอปต้นแบบสำหรับเด็กประถม บันทึกจานอาหาร น้ำดื่ม และเรียนรู้การกินสมดุลแบบ 2:1:1">
-  <title>กินดี Kids — แอปบันทึกจานอาหารสำหรับเด็กประถม</title>
+  <meta name="description" content="กินดี Kids AI เว็บแอปสำหรับเด็กประถม ใช้ AI ช่วยประเมินภาพอาหาร ผู้ใช้ตรวจผล และเรียนรู้การกินสมดุลแบบ 2:1:1">
+  <title>กินดี Kids AI — แอปถ่ายภาพอาหารและเรียนรู้โภชนาการ</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
+  <script src="config.js" defer></script>
   <script src="app.js" defer></script>
+  <script src="ai.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#mainContent">ข้ามไปยังเนื้อหาหลัก</a>
@@ -19,8 +21,8 @@
       <img class="brand-icon" src="icon.svg" alt="โลโก้แอปกินดี">
       <div>
         <p class="eyebrow">ต้นแบบโครงงาน I-New Gen Junior 2027</p>
-        <h1>กินดี <span>Kids</span></h1>
-        <p class="brand-subtitle">ถ่ายรูป • เลือกหมู่อาหาร • ดูความสมดุลในแต่ละวัน</p>
+        <h1>กินดี <span>Kids AI</span></h1>
+        <p class="brand-subtitle">ถ่ายรูป • AI ช่วยแยกหมู่อาหาร • ผู้ใช้ตรวจผล • ดูความสมดุล</p>
       </div>
     </div>
     <div class="header-actions">
@@ -129,7 +131,7 @@
         <div>
           <p class="eyebrow">บันทึกมื้ออาหาร</p>
           <h2>รูปหนึ่งรูป เล่าเรื่องอาหารได้หลายอย่าง</h2>
-          <p class="muted">อัปโหลดหรือถ่ายรูป แล้วเลือกหมู่อาหารที่เห็นจริง แอปจะช่วยสรุปความสมดุล</p>
+          <p class="muted">อัปโหลดหรือถ่ายรูป ให้ AI ช่วยประเมินอาหารที่มองเห็น แล้วตรวจและแก้ผลก่อนบันทึก</p>
         </div>
       </div>
 
@@ -175,9 +177,45 @@
                 <input id="mealPhoto" type="file" accept="image/*" capture="environment">
               </label>
               <button class="button button-ghost hidden" id="removePhotoButton" type="button">ลบรูป</button>
-              <small>รูปจะถูกย่อและเก็บไว้เฉพาะในอุปกรณ์นี้</small>
+              <small>รูปจะถูกย่อและเก็บในอุปกรณ์ ส่งไปวิเคราะห์เฉพาะเมื่อกดปุ่ม AI</small>
             </div>
           </div>
+
+          <input type="hidden" id="aiMeta" value="">
+          <section class="ai-tool-card" aria-labelledby="aiToolTitle">
+            <div class="ai-tool-heading">
+              <div>
+                <p class="eyebrow">AI ผู้ช่วยอ่านจานอาหาร</p>
+                <h3 id="aiToolTitle">ถ่ายรูปแล้วให้ AI ช่วยประเมิน</h3>
+                <p class="muted">ระบบจะระบุอาหารที่มองเห็น ประเมินอาหาร 5 กลุ่ม และแสดงช่วงสารอาหารโดยประมาณ จากนั้นผู้ใช้ต้องตรวจและแก้ผลก่อนบันทึก</p>
+              </div>
+              <span class="ai-stage-pill">AI ช่วยเสนอ • คนเป็นผู้ยืนยัน</span>
+            </div>
+
+            <label class="ai-consent-card">
+              <input id="aiPrivacyConsent" type="checkbox">
+              <span>
+                <strong>ฉันตรวจแล้วว่ารูปมีเฉพาะอาหาร</strong>
+                <small>ไม่มีใบหน้า ป้ายชื่อ ชุดนักเรียน ที่อยู่ หรือข้อมูลส่วนตัวของเด็ก</small>
+              </span>
+            </label>
+
+            <div class="ai-actions">
+              <button class="button button-ai" id="analyzePhotoButton" type="button" disabled>
+                <span aria-hidden="true">✨</span> วิเคราะห์ภาพด้วย AI
+              </button>
+              <button class="button button-ghost hidden" id="clearAiButton" type="button">ล้างผล AI</button>
+            </div>
+
+            <div class="ai-status" id="aiStatus" role="status" aria-live="polite">
+              เพิ่มรูปอาหารและยืนยันความเป็นส่วนตัวก่อนเริ่มวิเคราะห์
+            </div>
+            <div class="ai-result hidden" id="aiResult" aria-live="polite"></div>
+
+            <p class="ai-disclaimer">
+              ผลเป็นค่าประมาณเพื่อการเรียนรู้จากสิ่งที่มองเห็นในภาพ ไม่สามารถรู้ปริมาณน้ำมัน น้ำตาล ซอส หรือมวลอาหารที่แน่นอนได้ และไม่ใช้วินิจฉัยสุขภาพ
+            </p>
+          </section>
 
           <fieldset class="portion-fieldset">
             <legend>จากภาพนี้ มีอาหารแต่ละกลุ่มประมาณกี่ส่วน?</legend>
@@ -319,8 +357,8 @@
         </article>
         <article class="lesson-card">
           <span aria-hidden="true">👨‍👩‍👧</span>
-          <h3>ทำร่วมกับผู้ปกครอง</h3>
-          <p>ผู้ปกครองช่วยตรวจภาพและปรับจำนวนส่วนให้ใกล้เคียงจานจริงได้</p>
+          <h3>AI ต้องตรวจซ้ำกับผู้ปกครอง</h3>
+          <p>AI อาจทายผิด ผู้ปกครองและเด็กจึงต้องตรวจชื่ออาหาร กลุ่มอาหาร และจำนวนส่วนก่อนกดบันทึก</p>
         </article>
       </section>
 
@@ -340,7 +378,7 @@
         <div>
           <p class="eyebrow">ตั้งค่าและข้อมูลโครงงาน</p>
           <h2>ปรับแอปให้เหมาะกับผู้ใช้</h2>
-          <p class="muted">ข้อมูลทั้งหมดเก็บในเบราว์เซอร์ของอุปกรณ์นี้ ไม่มีการส่งขึ้นเซิร์ฟเวอร์</p>
+          <p class="muted">ข้อมูลบันทึกเก็บในเบราว์เซอร์ของอุปกรณ์นี้ เฉพาะรูปที่ผู้ใช้กด “วิเคราะห์ด้วย AI” จะถูกส่งไปยังระบบวิเคราะห์ โดยไม่ส่งชื่อเล่น ระดับชั้น หรือชื่อโรงเรียน</p>
         </div>
       </div>
 
@@ -411,15 +449,15 @@
             <li>ติดตามน้ำดื่มและดูกราฟ 7 วัน</li>
             <li>ส่งออก CSV/JSON และทำงานออฟไลน์</li>
           </ul>
-          <p class="tiny muted"><strong>ขอบเขตต้นแบบ:</strong> ยังไม่ได้ใช้ AI ระบุอาหารอัตโนมัติ ผู้ใช้ยืนยันชนิดอาหารจากภาพเอง เพื่อให้ผลโปร่งใสและตรวจสอบได้</p>
+          <p class="tiny muted"><strong>ขอบเขตต้นแบบ:</strong> AI ช่วยระบุอาหารที่มองเห็นและประเมินอาหาร 5 กลุ่ม แต่ผู้ใช้ต้องยืนยันหรือแก้ผลทุกครั้ง ค่าสารอาหารเป็นช่วงประมาณจากหน่วยส่วนอาหาร ไม่ใช่ผลตรวจทางห้องปฏิบัติการ</p>
         </article>
       </div>
     </section>
   </main>
 
   <footer class="app-footer">
-    <p><strong>กินดี Kids</strong> — ต้นแบบสื่อเรียนรู้โภชนาการสำหรับเด็กประถม</p>
-    <p>ไม่เก็บข้อมูลบนเซิร์ฟเวอร์ • ไม่คำนวณน้ำหนักเป้าหมาย • ไม่ใช้แทนคำแนะนำทางการแพทย์</p>
+    <p><strong>กินดี Kids AI</strong> — ต้นแบบสื่อเรียนรู้โภชนาการสำหรับเด็กประถม</p>
+    <p>ข้อมูลบันทึกอยู่ในอุปกรณ์ • รูปถูกส่งเฉพาะเมื่อกดวิเคราะห์ AI • ไม่คำนวณน้ำหนักเป้าหมาย • ไม่ใช้แทนคำแนะนำทางการแพทย์</p>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

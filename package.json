@@ -1,0 +1,14 @@
+{
+  "name": "kindee-kids-ai",
+  "version": "2.0.0",
+  "private": true,
+  "description": "กินดี Kids เว็บแอป AI ช่วยประเมินภาพอาหารสำหรับการเรียนรู้โภชนาการ",
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "check": "node --check app.js && node --check ai.js && node --check api/analyze-food.js",
+    "build:standalone": "python build_standalone.py"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

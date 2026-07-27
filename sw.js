@@ -1,9 +1,11 @@
-const CACHE_NAME = "kindee-kids-v1";
+const CACHE_NAME = "kindee-kids-v2-ai";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
+  "./config.js",
   "./app.js",
+  "./ai.js",
   "./icon.svg",
   "./manifest.webmanifest"
 ];

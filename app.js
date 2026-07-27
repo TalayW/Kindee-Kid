@@ -6,8 +6,9 @@
   หลักการสำคัญ
   1) ไม่คำนวณน้ำหนักเป้าหมายหรือสั่งให้อดอาหาร
   2) ใช้จำนวน “ส่วน” เพื่อเรียนรู้ความหลากหลายของอาหาร
-  3) เก็บข้อมูลไว้ใน localStorage ของอุปกรณ์เท่านั้น
-  4) การวิเคราะห์ภาพเป็นแบบผู้ใช้ยืนยันเอง ไม่อ้างว่าเป็น AI
+  3) ข้อมูลบันทึกเก็บไว้ใน localStorage ของอุปกรณ์
+  4) AI ช่วยประเมินภาพ แต่ผู้ใช้ต้องตรวจและยืนยันผลก่อนบันทึก
+  5) ไม่ส่งชื่อเล่น ระดับชั้น หรือชื่อโรงเรียนไปยังระบบ AI
 */
 
 const STORAGE_KEYS = {
@@ -214,6 +215,7 @@ const elements = {
   mealName: $("#mealName"),
   mealPhoto: $("#mealPhoto"),
   photoPreview: $("#photoPreview"),
+  aiMeta: $("#aiMeta"),
   removePhotoButton: $("#removePhotoButton"),
   templateButtons: $("#templateButtons"),
   portionControls: $("#portionControls"),
@@ -355,6 +357,38 @@ function normalizeDay(day) {
   return { ...base, ...normalized };
 }
 
+function normalizeAiMetadata(ai) {
+  if (!ai || typeof ai !== "object" || !ai.assisted) return null;
+  const confidenceValues = new Set(["low", "medium", "high"]);
+  const groups = {};
+  Object.keys(FOOD_GROUPS).forEach((groupKey) => {
+    groups[groupKey] = roundHalf(clampNumber(ai.groups?.[groupKey], 0, 6, 0));
+  });
+
+  return {
+    assisted: true,
+    userConfirmed: Boolean(ai.userConfirmed),
+    confidence: confidenceValues.has(ai.confidence) ? ai.confidence : "low",
+    mealName: String(ai.mealName || "").slice(0, 80),
+    items: Array.isArray(ai.items)
+      ? ai.items.slice(0, 12).map((item) => String(item || "").slice(0, 60)).filter(Boolean)
+      : [],
+    groups,
+    analyzedAt: typeof ai.analyzedAt === "string" ? ai.analyzedAt : "",
+    model: String(ai.model || "").slice(0, 50)
+  };
+}
+
+function readAiMetadataFromForm() {
+  if (!elements.aiMeta?.value) return null;
+  try {
+    return normalizeAiMetadata(JSON.parse(elements.aiMeta.value));
+  } catch (error) {
+    console.warn("อ่านข้อมูลผล AI ไม่สำเร็จ", error);
+    return null;
+  }
+}
+
 function normalizeEntry(entry) {
   if (!entry || typeof entry !== "object") return null;
   const groups = {};
@@ -373,6 +407,7 @@ function normalizeEntry(entry) {
     },
     note: String(entry.note || "").slice(0, 180),
     photo: isSafeImageDataUrl(entry.photo) ? entry.photo : "",
+    ai: normalizeAiMetadata(entry.ai),
     createdAt: typeof entry.createdAt === "string" ? entry.createdAt : new Date().toISOString()
   };
 }
@@ -739,6 +774,10 @@ function createMealEntryElement(entry, mealType) {
   if (entry.flags.sweetDrink) tags.appendChild(makeTag("🧋 น้ำหวาน"));
   if (entry.flags.fried) tags.appendChild(makeTag("🍟 ของทอด"));
   if (entry.flags.sweetSnack) tags.appendChild(makeTag("🍰 ขนมหวาน"));
+  if (entry.ai?.assisted) {
+    const confidenceLabel = { low: "ต่ำ", medium: "ปานกลาง", high: "สูง" }[entry.ai.confidence] || "";
+    tags.appendChild(makeTag(`✨ AI ช่วยประเมิน${confidenceLabel ? ` • มั่นใจ${confidenceLabel}` : ""}`));
+  }
   body.appendChild(tags);
 
   const actions = document.createElement("div");
@@ -853,6 +892,8 @@ function resetMealForm({ keepDate = true, keepMealType = false } = {}) {
   elements.editingId.value = "";
   state.editingOriginal = null;
   state.currentPhoto = "";
+  if (elements.aiMeta) elements.aiMeta.value = "";
+  window.dispatchEvent(new CustomEvent("kindee:ai-reset"));
   elements.mealDate.value = keepDate ? date : todayISO();
   elements.mealType.value = keepMealType ? mealType : "breakfast";
   setAllPortions({});
@@ -948,6 +989,7 @@ function saveMeal(event) {
     },
     note: elements.mealNote.value.trim(),
     photo: state.currentPhoto,
+    ai: readAiMetadataFromForm(),
     createdAt: new Date().toISOString()
   });
 
@@ -996,9 +1038,11 @@ function editEntry(date, mealType, entryId) {
   elements.flagSweetSnack.checked = entry.flags.sweetSnack;
   elements.mealNote.value = entry.note;
   state.currentPhoto = entry.photo || "";
+  if (elements.aiMeta) elements.aiMeta.value = entry.ai ? JSON.stringify(entry.ai) : "";
   renderPhotoPreview();
   elements.saveMealButton.textContent = "บันทึกการแก้ไข";
   switchRoute("record");
+  window.dispatchEvent(new CustomEvent("kindee:ai-load", { detail: entry.ai || null }));
 }
 
 async function deleteEntry(date, mealType, entryId) {
@@ -1156,7 +1200,7 @@ function exportCsv() {
   const header = [
     "date", "meal", "menu", "vegetable_portion", "starch_portion", "protein_portion",
     "fruit_portion", "dairy_portion", "sweet_drink", "fried_food", "sweet_snack",
-    "water_cups", "daily_score", "note"
+    "ai_assisted", "ai_confidence", "ai_items", "water_cups", "daily_score", "note"
   ];
   const lines = [header.join(",")];
 
@@ -1177,6 +1221,9 @@ function exportCsv() {
           entry.flags.sweetDrink ? 1 : 0,
           entry.flags.fried ? 1 : 0,
           entry.flags.sweetSnack ? 1 : 0,
+          entry.ai?.assisted ? 1 : 0,
+          entry.ai?.confidence || "",
+          entry.ai?.items?.join(" | ") || "",
           day.water,
           score,
           entry.note
@@ -1186,7 +1233,7 @@ function exportCsv() {
     });
 
     if (Object.values(day.meals).every((entries) => entries.length === 0) && day.water > 0) {
-      const row = [date, "water_only", "", 0, 0, 0, 0, 0, 0, 0, 0, day.water, score, ""];
+      const row = [date, "water_only", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", day.water, score, ""];
       lines.push(row.map(csvCell).join(","));
     }
   });

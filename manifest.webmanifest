@@ -1,7 +1,7 @@
 {
   "name": "กินดี Kids",
   "short_name": "กินดี",
-  "description": "แอปบันทึกจานอาหารและพฤติกรรมสุขภาพสำหรับเด็กประถม",
+  "description": "AI ช่วยประเมินภาพอาหารและเรียนรู้โภชนาการสำหรับเด็กประถม",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f5faf4",
