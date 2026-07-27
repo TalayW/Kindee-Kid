@@ -1,0 +1,18 @@
+{
+  "name": "กินดี Kids",
+  "short_name": "กินดี",
+  "description": "แอปบันทึกจานอาหารและพฤติกรรมสุขภาพสำหรับเด็กประถม",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5faf4",
+  "theme_color": "#2f8f5b",
+  "lang": "th",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

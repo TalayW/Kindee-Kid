@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2f8f5b">
+  <meta name="description" content="กินดี Kids เว็บแอปต้นแบบสำหรับเด็กประถม บันทึกจานอาหาร น้ำดื่ม และเรียนรู้การกินสมดุลแบบ 2:1:1">
+  <title>กินดี Kids — แอปบันทึกจานอาหารสำหรับเด็กประถม</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#mainContent">ข้ามไปยังเนื้อหาหลัก</a>
+
+  <header class="app-header">
+    <div class="brand-block">
+      <img class="brand-icon" src="icon.svg" alt="โลโก้แอปกินดี">
+      <div>
+        <p class="eyebrow">ต้นแบบโครงงาน I-New Gen Junior 2027</p>
+        <h1>กินดี <span>Kids</span></h1>
+        <p class="brand-subtitle">ถ่ายรูป • เลือกหมู่อาหาร • ดูความสมดุลในแต่ละวัน</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="profile-chip" aria-live="polite">
+        <span aria-hidden="true">👋</span>
+        <span id="headerGreeting">สวัสดี นักกินดี</span>
+      </div>
+      <button class="button button-ghost hidden" id="installButton" type="button">ติดตั้งแอป</button>
+    </div>
+  </header>
+
+  <nav class="app-nav" aria-label="เมนูหลัก">
+    <button class="nav-button active" type="button" data-route="today" aria-current="page">
+      <span aria-hidden="true">🏠</span><span>วันนี้</span>
+    </button>
+    <button class="nav-button" type="button" data-route="record">
+      <span aria-hidden="true">📷</span><span>บันทึก</span>
+    </button>
+    <button class="nav-button" type="button" data-route="history">
+      <span aria-hidden="true">📊</span><span>ประวัติ</span>
+    </button>
+    <button class="nav-button" type="button" data-route="learn">
+      <span aria-hidden="true">🥗</span><span>เรียนรู้</span>
+    </button>
+    <button class="nav-button" type="button" data-route="settings">
+      <span aria-hidden="true">⚙️</span><span>ตั้งค่า</span>
+    </button>
+  </nav>
+
+  <main id="mainContent" class="main-shell">
+    <section class="route-panel active" id="route-today" data-route-panel="today">
+      <div class="section-title-row">
+        <div>
+          <p class="eyebrow">สรุปประจำวัน</p>
+          <h2>วันนี้กินสมดุลแค่ไหน?</h2>
+          <p class="muted">คะแนนนี้ใช้เพื่อเรียนรู้พฤติกรรม ไม่ใช่คะแนนความเก่งหรือการลดน้ำหนัก</p>
+        </div>
+        <label class="date-control">
+          <span>วันที่</span>
+          <input id="dashboardDate" type="date">
+        </label>
+      </div>
+
+      <div class="dashboard-grid">
+        <article class="score-card card">
+          <div class="score-ring" id="scoreRing" role="img" aria-label="คะแนนกินดี 0 จาก 100">
+            <div class="score-ring-inner">
+              <strong id="scoreNumber">0</strong>
+              <span>/ 100</span>
+            </div>
+          </div>
+          <div class="score-copy">
+            <p class="score-badge" id="scoreBadge">เริ่มบันทึกมื้อแรกกันเลย</p>
+            <h3 id="scoreHeadline">ทุกมื้อเล็ก ๆ นับเป็นก้าวที่ดี</h3>
+            <ul class="suggestion-list" id="suggestionList"></ul>
+            <button class="button button-primary" type="button" data-go-record>เพิ่มมื้ออาหาร</button>
+          </div>
+        </article>
+
+        <article class="card water-card">
+          <div class="card-heading-inline">
+            <div>
+              <p class="eyebrow">น้ำเปล่า</p>
+              <h3>วันนี้ดื่มกี่แก้ว?</h3>
+            </div>
+            <strong id="waterCountLabel">0 / 6</strong>
+          </div>
+          <div class="water-cups" id="waterCups" aria-label="ตัวเลือกจำนวนแก้วน้ำ"></div>
+          <p class="tiny muted">แตะแก้วเพื่อบันทึก จำนวนเป้าหมายปรับได้ในหน้าตั้งค่า</p>
+        </article>
+      </div>
+
+      <section class="progress-section">
+        <div class="section-mini-heading">
+          <div>
+            <p class="eyebrow">ภาพรวมหมู่อาหาร</p>
+            <h3>สารอาหารเด่นที่ได้รับวันนี้</h3>
+          </div>
+          <span class="info-pill">หน่วย “ส่วน” เป็นค่าประมาณจากภาพจริง</span>
+        </div>
+        <div class="nutrient-grid" id="nutrientGrid"></div>
+      </section>
+
+      <section class="meal-section">
+        <div class="section-mini-heading">
+          <div>
+            <p class="eyebrow">มื้ออาหาร</p>
+            <h3>บันทึกของวันนี้</h3>
+          </div>
+          <button class="button button-secondary" type="button" data-go-record>+ เพิ่มมื้อ</button>
+        </div>
+        <div class="meal-board" id="mealBoard"></div>
+      </section>
+
+      <aside class="notice-card">
+        <span class="notice-icon" aria-hidden="true">💚</span>
+        <div>
+          <strong>แอปนี้ไม่ตัดสินรูปร่างและไม่สั่งให้อดอาหาร</strong>
+          <p>ใช้เพื่อช่วยเด็กกับผู้ปกครองสังเกตความหลากหลายของอาหารและวางแผนมื้อต่อไปอย่างเป็นมิตร</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="route-panel" id="route-record" data-route-panel="record" hidden>
+      <div class="section-title-row">
+        <div>
+          <p class="eyebrow">บันทึกมื้ออาหาร</p>
+          <h2>รูปหนึ่งรูป เล่าเรื่องอาหารได้หลายอย่าง</h2>
+          <p class="muted">อัปโหลดหรือถ่ายรูป แล้วเลือกหมู่อาหารที่เห็นจริง แอปจะช่วยสรุปความสมดุล</p>
+        </div>
+      </div>
+
+      <div class="record-layout">
+        <form class="card meal-form" id="mealForm" novalidate>
+          <input type="hidden" id="editingId">
+
+          <div class="form-grid two-columns">
+            <label class="field">
+              <span>วันที่</span>
+              <input id="mealDate" type="date" required>
+            </label>
+            <label class="field">
+              <span>มื้อ</span>
+              <select id="mealType" required>
+                <option value="breakfast">มื้อเช้า</option>
+                <option value="lunch">มื้อกลางวัน</option>
+                <option value="dinner">มื้อเย็น</option>
+                <option value="snack">อาหารว่าง</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="field">
+            <span>เลือกเมนูตัวอย่างเพื่อเริ่มเร็ว</span>
+            <div class="template-scroller" id="templateButtons" aria-label="เมนูอาหารตัวอย่าง"></div>
+            <small>ค่าที่เติมเป็นเพียงตัวอย่าง ให้ปรับตามจานจริงก่อนบันทึก</small>
+          </div>
+
+          <label class="field">
+            <span>ชื่อเมนูหรืออาหารที่กิน</span>
+            <input id="mealName" type="text" maxlength="80" placeholder="เช่น ข้าวสวย ผัดผัก และไข่ต้ม" required>
+          </label>
+
+          <div class="photo-field">
+            <div class="photo-preview" id="photoPreview" aria-live="polite">
+              <span aria-hidden="true">📷</span>
+              <p>ยังไม่มีรูปอาหาร</p>
+            </div>
+            <div class="photo-actions">
+              <label class="button button-secondary file-button">
+                ถ่ายรูป / เลือกรูป
+                <input id="mealPhoto" type="file" accept="image/*" capture="environment">
+              </label>
+              <button class="button button-ghost hidden" id="removePhotoButton" type="button">ลบรูป</button>
+              <small>รูปจะถูกย่อและเก็บไว้เฉพาะในอุปกรณ์นี้</small>
+            </div>
+          </div>
+
+          <fieldset class="portion-fieldset">
+            <legend>จากภาพนี้ มีอาหารแต่ละกลุ่มประมาณกี่ส่วน?</legend>
+            <p class="muted small-text">ใช้ปุ่ม + / − ปรับค่าตามสิ่งที่เห็น ไม่จำเป็นต้องแม่นยำเท่าห้องปฏิบัติการ</p>
+            <div class="portion-grid" id="portionControls"></div>
+          </fieldset>
+
+          <fieldset class="choice-fieldset">
+            <legend>สิ่งที่พบในมื้อนี้</legend>
+            <div class="choice-grid">
+              <label class="choice-card">
+                <input id="flagSweetDrink" type="checkbox">
+                <span aria-hidden="true">🧋</span>
+                <strong>มีน้ำหวาน</strong>
+              </label>
+              <label class="choice-card">
+                <input id="flagFried" type="checkbox">
+                <span aria-hidden="true">🍟</span>
+                <strong>มีของทอดมาก</strong>
+              </label>
+              <label class="choice-card">
+                <input id="flagSweetSnack" type="checkbox">
+                <span aria-hidden="true">🍰</span>
+                <strong>มีขนมหวาน</strong>
+              </label>
+            </div>
+          </fieldset>
+
+          <label class="field">
+            <span>บันทึกเพิ่มเติม (ไม่บังคับ)</span>
+            <textarea id="mealNote" rows="3" maxlength="180" placeholder="เช่น วันนี้ลองกินผักเพิ่ม 1 คำ"></textarea>
+          </label>
+
+          <div class="form-actions">
+            <button class="button button-primary" type="submit" id="saveMealButton">บันทึกมื้อนี้</button>
+            <button class="button button-ghost" type="button" id="resetMealButton">ล้างแบบฟอร์ม</button>
+          </div>
+        </form>
+
+        <aside class="record-side">
+          <article class="card live-preview-card">
+            <p class="eyebrow">ตัวอย่างก่อนบันทึก</p>
+            <h3>จานนี้ใกล้เคียง 2:1:1 แค่ไหน?</h3>
+            <div class="mini-plate" aria-hidden="true">
+              <div class="mini-plate-veg"><span>ผัก</span><strong id="previewVeg">0</strong></div>
+              <div class="mini-plate-starch"><span>ข้าว/แป้ง</span><strong id="previewStarch">0</strong></div>
+              <div class="mini-plate-protein"><span>โปรตีน</span><strong id="previewProtein">0</strong></div>
+            </div>
+            <p class="preview-message" id="platePreviewMessage">เริ่มเลือกหมู่อาหารจากภาพก่อนนะ</p>
+          </article>
+
+          <article class="card help-card">
+            <p class="eyebrow">เคล็ดลับสำหรับเด็ก</p>
+            <h3>วัดด้วยมือของเราเอง</h3>
+            <ul>
+              <li><span aria-hidden="true">✊</span> กำมือหนึ่งกำ ≈ อาหารหนึ่งส่วนแบบง่าย</li>
+              <li><span aria-hidden="true">🖐️</span> ฝ่ามือหนึ่งฝ่า ≈ โปรตีนหนึ่งส่วน</li>
+              <li><span aria-hidden="true">🥛</span> นมหนึ่งแก้ว ≈ นมหนึ่งส่วน</li>
+            </ul>
+          </article>
+        </aside>
+      </div>
+    </section>
+
+    <section class="route-panel" id="route-history" data-route-panel="history" hidden>
+      <div class="section-title-row">
+        <div>
+          <p class="eyebrow">ดูการเปลี่ยนแปลง</p>
+          <h2>ประวัติย้อนหลัง 7 วัน</h2>
+          <p class="muted">ใช้ข้อมูลเพื่อสังเกตและปรับพฤติกรรม ไม่ใช้เปรียบเทียบรูปร่างระหว่างเด็ก</p>
+        </div>
+        <div class="button-row">
+          <button class="button button-secondary" id="exportCsvButton" type="button">ส่งออก CSV</button>
+          <button class="button button-secondary" id="exportJsonButton" type="button">สำรอง JSON</button>
+          <button class="button button-ghost" id="printButton" type="button">พิมพ์รายงาน</button>
+        </div>
+      </div>
+
+      <div class="history-summary-grid" id="historySummaryGrid"></div>
+
+      <article class="card chart-card">
+        <div class="card-heading-inline">
+          <div>
+            <p class="eyebrow">คะแนนรายวัน</p>
+            <h3>กราฟกินดี 7 วัน</h3>
+          </div>
+          <span class="info-pill">0–100 คะแนน</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="historyChart" width="900" height="360" aria-label="กราฟคะแนนกินดีย้อนหลัง 7 วัน"></canvas>
+        </div>
+      </article>
+
+      <div class="history-list" id="historyList"></div>
+    </section>
+
+    <section class="route-panel" id="route-learn" data-route-panel="learn" hidden>
+      <div class="section-title-row">
+        <div>
+          <p class="eyebrow">เรียนรู้โภชนาการแบบง่าย</p>
+          <h2>จานสมดุล 2:1:1</h2>
+          <p class="muted">แบ่งจานเป็นผัก 2 ส่วน ข้าวหรือแป้ง 1 ส่วน และโปรตีน 1 ส่วน แล้วเสริมผลไม้ นม และน้ำเปล่าให้เหมาะสม</p>
+        </div>
+      </div>
+
+      <div class="learn-grid">
+        <article class="card plate-card">
+          <div class="healthy-plate" role="img" aria-label="ภาพจานอาหารแบ่งเป็นผักสองส่วน ข้าวหนึ่งส่วน และโปรตีนหนึ่งส่วน">
+            <div class="plate-half plate-veg"><span>ผัก</span><strong>2 ส่วน</strong></div>
+            <div class="plate-quarter plate-starch"><span>ข้าว/แป้ง</span><strong>1 ส่วน</strong></div>
+            <div class="plate-quarter plate-protein"><span>โปรตีน</span><strong>1 ส่วน</strong></div>
+          </div>
+          <p class="tiny muted">สัดส่วนเป็นแนวทางสังเกตจาน ไม่ใช่ใบสั่งอาหารเฉพาะบุคคล</p>
+        </article>
+
+        <article class="card food-groups-card">
+          <p class="eyebrow">อาหาร 5 กลุ่ม</p>
+          <h3>แต่ละกลุ่มช่วยอะไร?</h3>
+          <div class="learn-group-list">
+            <div><span>🥬</span><p><strong>ผัก</strong><br>ใยอาหาร วิตามิน และแร่ธาตุ</p></div>
+            <div><span>🍚</span><p><strong>ข้าวและแป้ง</strong><br>พลังงานสำหรับเรียนและเล่น</p></div>
+            <div><span>🥚</span><p><strong>โปรตีน</strong><br>ช่วยการเจริญเติบโตและซ่อมแซมร่างกาย</p></div>
+            <div><span>🍊</span><p><strong>ผลไม้</strong><br>วิตามิน แร่ธาตุ และใยอาหาร</p></div>
+            <div><span>🥛</span><p><strong>นม</strong><br>โปรตีนและแคลเซียม</p></div>
+          </div>
+        </article>
+      </div>
+
+      <section class="lesson-cards">
+        <article class="lesson-card">
+          <span aria-hidden="true">🌈</span>
+          <h3>เลือกให้หลากสี</h3>
+          <p>ผักและผลไม้หลายสีช่วยให้เราได้สารอาหารหลากหลายขึ้น</p>
+        </article>
+        <article class="lesson-card">
+          <span aria-hidden="true">💧</span>
+          <h3>น้ำเปล่าเป็นหลัก</h3>
+          <p>ใช้ตัวนับแก้วน้ำเพื่อเตือนตนเองอย่างอ่อนโยน ไม่จำเป็นต้องแข่งกับคนอื่น</p>
+        </article>
+        <article class="lesson-card">
+          <span aria-hidden="true">👨‍👩‍👧</span>
+          <h3>ทำร่วมกับผู้ปกครอง</h3>
+          <p>ผู้ปกครองช่วยตรวจภาพและปรับจำนวนส่วนให้ใกล้เคียงจานจริงได้</p>
+        </article>
+      </section>
+
+      <article class="card source-card">
+        <p class="eyebrow">แหล่งเรียนรู้ที่ใช้เป็นแนวคิด</p>
+        <h3>อ้างอิงสำหรับโครงงาน</h3>
+        <ul>
+          <li><a href="https://dol.thaihealth.or.th/Media/Index/4cb65338-8ee9-ed11-80fd-00155d1aab66" target="_blank" rel="noopener">Healthy Plate: สูตรจานอาหารเด็กกินดี — ศูนย์เรียนรู้สุขภาวะ สสส.</a></li>
+          <li><a href="https://resourcecenter.thaihealth.or.th/assets/mediadol/download_dol/ece882b0-4cf3-e711-80e3-00155d65ec2e/downloaded_file_20250819204332.pdf" target="_blank" rel="noopener">คู่มือ “เด็กไทยกินดี ดูดี” — ThaiHealth Resource Center</a></li>
+        </ul>
+        <p class="tiny muted">ข้อมูลในแอปเป็นสื่อการเรียนรู้และค่าประมาณ ไม่ใช้วินิจฉัยโรคหรือแทนคำแนะนำจากแพทย์/นักกำหนดอาหาร</p>
+      </article>
+    </section>
+
+    <section class="route-panel" id="route-settings" data-route-panel="settings" hidden>
+      <div class="section-title-row">
+        <div>
+          <p class="eyebrow">ตั้งค่าและข้อมูลโครงงาน</p>
+          <h2>ปรับแอปให้เหมาะกับผู้ใช้</h2>
+          <p class="muted">ข้อมูลทั้งหมดเก็บในเบราว์เซอร์ของอุปกรณ์นี้ ไม่มีการส่งขึ้นเซิร์ฟเวอร์</p>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <form class="card settings-card" id="profileForm">
+          <p class="eyebrow">ข้อมูลผู้ใช้</p>
+          <h3>โปรไฟล์นักกินดี</h3>
+          <label class="field">
+            <span>ชื่อเล่น</span>
+            <input id="profileName" type="text" maxlength="30" placeholder="เช่น น้องฟ้า">
+          </label>
+          <label class="field">
+            <span>ระดับชั้น</span>
+            <select id="profileGrade">
+              <option value="">ไม่ระบุ</option>
+              <option value="ป.4">ป.4</option>
+              <option value="ป.5">ป.5</option>
+              <option value="ป.6">ป.6</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>โรงเรียน (ไม่บังคับ)</span>
+            <input id="profileSchool" type="text" maxlength="80" placeholder="ชื่อโรงเรียน">
+          </label>
+          <button class="button button-primary" type="submit">บันทึกโปรไฟล์</button>
+        </form>
+
+        <form class="card settings-card" id="goalsForm">
+          <p class="eyebrow">เป้าหมายเพื่อการสังเกต</p>
+          <h3>ปรับจำนวนรายวัน</h3>
+          <label class="field">
+            <span>น้ำเปล่า (แก้ว)</span>
+            <input id="goalWater" type="number" min="1" max="12" step="1">
+          </label>
+          <label class="field">
+            <span>ผลไม้ (ส่วน)</span>
+            <input id="goalFruit" type="number" min="1" max="5" step="0.5">
+          </label>
+          <label class="field">
+            <span>นม (ส่วน)</span>
+            <input id="goalDairy" type="number" min="0.5" max="4" step="0.5">
+          </label>
+          <button class="button button-primary" type="submit">บันทึกเป้าหมาย</button>
+          <small>เป้าหมายเริ่มต้นเป็นค่าทั่วไปเพื่อใช้ทดสอบแอป ควรให้ผู้ปกครองหรือผู้เชี่ยวชาญช่วยปรับเมื่อใช้จริง</small>
+        </form>
+
+        <article class="card settings-card data-card">
+          <p class="eyebrow">จัดการข้อมูล</p>
+          <h3>ทดลอง สำรอง และล้างข้อมูล</h3>
+          <div class="stacked-actions">
+            <button class="button button-secondary" id="demoDataButton" type="button">ใส่ข้อมูลตัวอย่าง 7 วัน</button>
+            <label class="button button-secondary file-button">
+              นำเข้าไฟล์ JSON
+              <input id="importJsonInput" type="file" accept="application/json,.json">
+            </label>
+            <button class="button button-danger" id="clearDataButton" type="button">ล้างข้อมูลทั้งหมด</button>
+          </div>
+          <p class="tiny muted">ก่อนล้างข้อมูล แนะนำให้กด “สำรอง JSON” ที่หน้าประวัติ</p>
+        </article>
+
+        <article class="card settings-card project-card">
+          <p class="eyebrow">สถานะต้นแบบ</p>
+          <h3>สิ่งที่แอปทำได้แล้ว</h3>
+          <ul class="check-list">
+            <li>บันทึกอาหาร 4 มื้อพร้อมรูปภาพ</li>
+            <li>เลือกจำนวนส่วนจากอาหาร 5 กลุ่ม</li>
+            <li>คำนวณคะแนนสมดุลและคำแนะนำ</li>
+            <li>ติดตามน้ำดื่มและดูกราฟ 7 วัน</li>
+            <li>ส่งออก CSV/JSON และทำงานออฟไลน์</li>
+          </ul>
+          <p class="tiny muted"><strong>ขอบเขตต้นแบบ:</strong> ยังไม่ได้ใช้ AI ระบุอาหารอัตโนมัติ ผู้ใช้ยืนยันชนิดอาหารจากภาพเอง เพื่อให้ผลโปร่งใสและตรวจสอบได้</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p><strong>กินดี Kids</strong> — ต้นแบบสื่อเรียนรู้โภชนาการสำหรับเด็กประถม</p>
+    <p>ไม่เก็บข้อมูลบนเซิร์ฟเวอร์ • ไม่คำนวณน้ำหนักเป้าหมาย • ไม่ใช้แทนคำแนะนำทางการแพทย์</p>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog class="confirm-dialog" id="confirmDialog">
+    <form method="dialog">
+      <h3 id="confirmTitle">ยืนยันการทำรายการ</h3>
+      <p id="confirmMessage"></p>
+      <div class="button-row end">
+        <button class="button button-ghost" value="cancel">ยกเลิก</button>
+        <button class="button button-danger" id="confirmActionButton" value="confirm">ยืนยัน</button>
+      </div>
+    </form>
+  </dialog>
+
+  <noscript>
+    <div class="noscript-message">แอปนี้ต้องเปิดใช้งาน JavaScript จึงจะบันทึกและคำนวณข้อมูลได้</div>
+  </noscript>
+</body>
+</html>

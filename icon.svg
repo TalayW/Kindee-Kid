@@ -1,0 +1,14 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="112" fill="#2F8F5B"/>
+  <circle cx="256" cy="246" r="154" fill="#FFFDF5"/>
+  <path d="M105 246C105 162.6 172.6 95 256 95V397C172.6 397 105 329.4 105 246Z" fill="#A8DFAF"/>
+  <path d="M256 95C339.4 95 407 162.6 407 246H256V95Z" fill="#FFD36D"/>
+  <path d="M256 246H407C407 329.4 339.4 397 256 397V246Z" fill="#F3A4A4"/>
+  <circle cx="256" cy="246" r="154" stroke="#FFFFFF" stroke-width="18"/>
+  <path d="M256 98V394M256 246H404" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round"/>
+  <path d="M127 105V204M102 107V169C102 189 116 204 127 204C138 204 152 189 152 169V107" stroke="#FFFFFF" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M386 105C358 134 358 180 386 204V105Z" stroke="#FFFFFF" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M386 204V256" stroke="#FFFFFF" stroke-width="15" stroke-linecap="round"/>
+  <rect x="159" y="408" width="194" height="66" rx="33" fill="#FFFFFF"/>
+  <text x="256" y="454" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#2F8F5B">กินดี</text>
+</svg>
